@@ -6,6 +6,10 @@ import dill
 import pandas as pd
 from pydantic import BaseModel
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+
 import nltk
 import string
 from nltk.corpus import stopwords
@@ -18,7 +22,11 @@ nltk.download('stopwords')
 
 app = FastAPI()
 
+# Настройка статических файлов (CSS/JS)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Настройка шаблонов Jinja2 (HTML)
+templates = Jinja2Templates(directory="templates")
 
 snowball = SnowballStemmer(language="russian")
 russian_stop_words = stopwords.words("russian")
@@ -43,9 +51,9 @@ request_count = 0
 class PredictionInput(BaseModel):
     text: str  # Текст для классификации
 
-@app.get("/")
-def read_root():
-    return {"message": "Сервер работает"}
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/stats")
 def stats():

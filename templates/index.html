@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Анализатор комментариев</title>
+  <link href="/static/style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="login-container">
+    <form class="login-box" id="commentForm">
+      <h2>Анализатор комментариев</h2>
+      <div class="input-group">
+        <textarea id="commentInput" placeholder="Введите комментарий..." required></textarea>
+      </div>
+      <button type="submit">Негативно или нет?</button>
+      <p id="result" class="signup"></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('commentForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const commentText = document.getElementById('commentInput').value;
+      const resultElement = document.getElementById('result');
+
+      try {
+        const response = await fetch('/predict_model', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: commentText })
+        });
+
+        const data = await response.json();
+        resultElement.textContent = data["Вывод:"] || "Ошибка: ответ не распознан";
+      } catch (error) {
+        resultElement.textContent = "Ошибка при отправке запроса";
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
